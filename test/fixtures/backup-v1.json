@@ -1,0 +1,231 @@
+{
+  "schema": 1,
+  "library": {
+    "seq": 5,
+    "rosters": [
+      {
+        "id": "r1",
+        "name": "Chamber choir",
+        "singers": [
+          {
+            "id": "s1",
+            "name": "Ada Lovelace",
+            "section": "Soprano"
+          },
+          {
+            "id": "s2",
+            "name": "Grace Hopper",
+            "section": "Alto"
+          },
+          {
+            "id": "s3",
+            "name": "Alan Turing",
+            "section": "Tenor"
+          },
+          {
+            "id": "s4",
+            "name": "Claude Shannon",
+            "section": "Bass"
+          }
+        ]
+      }
+    ],
+    "concerts": [
+      {
+        "id": "c1",
+        "name": "Spring concert",
+        "rosterId": "r1",
+        "members": [
+          {
+            "singerId": "s1"
+          },
+          {
+            "singerId": "s2"
+          },
+          {
+            "singerId": "s3"
+          }
+        ],
+        "guests": [],
+        "splits": [
+          {
+            "id": "2way",
+            "name": "2-way",
+            "cats": [
+              "1",
+              "2"
+            ]
+          }
+        ],
+        "assign": {
+          "s1": {
+            "2way": "1"
+          },
+          "s2": {
+            "2way": "2"
+          },
+          "s3": {
+            "2way": "1"
+          },
+          "s4": {
+            "2way": "2"
+          }
+        },
+        "arrangements": [
+          {
+            "id": "a1",
+            "name": "First half",
+            "seats": [
+              "s1",
+              "s2",
+              "__EMPTY__",
+              "__BLOCKED__",
+              "s3",
+              "__EMPTY__"
+            ],
+            "pins": [
+              "s1"
+            ],
+            "rows": 2,
+            "cols": 3,
+            "sectionOrder": [
+              "Soprano",
+              "Alto",
+              "Tenor",
+              "Bass"
+            ],
+            "labels": {
+              "rowLabel": "numbers",
+              "rowFirst": "top",
+              "colLabel": "letters",
+              "colOrder": "rtl"
+            },
+            "audienceAt": "top",
+            "walkOn": {
+              "rowFrom": "front",
+              "enterFrom": "both",
+              "perRow": [
+                null,
+                "left"
+              ],
+              "rowSeq": [
+                1,
+                0
+              ],
+              "splitCol": 1
+            },
+            "view": "2way"
+          },
+          {
+            "id": "a2",
+            "name": "Second half",
+            "seats": [
+              "s3",
+              "s2",
+              "s1",
+              "__EMPTY__"
+            ],
+            "pins": [],
+            "rows": 2,
+            "cols": 2,
+            "sectionOrder": [
+              "Soprano",
+              "Alto",
+              "Tenor",
+              "Bass"
+            ],
+            "labels": {
+              "rowLabel": "letters",
+              "rowFirst": "bottom",
+              "colLabel": "numbers",
+              "colOrder": "ltr"
+            },
+            "audienceAt": "bottom",
+            "walkOn": {
+              "rowFrom": "back",
+              "enterFrom": "left",
+              "perRow": [],
+              "rowSeq": null,
+              "splitCol": null
+            },
+            "view": ""
+          }
+        ]
+      }
+    ]
+  },
+  "open": {
+    "concertId": "c1",
+    "arrangementId": "a1"
+  },
+  "working": {
+    "id": "a1",
+    "name": "First half",
+    "seats": [
+      "s2",
+      "s1",
+      "__EMPTY__",
+      "__BLOCKED__",
+      "s3",
+      "__EMPTY__"
+    ],
+    "pins": [
+      "s1"
+    ],
+    "rows": 2,
+    "cols": 3,
+    "sectionOrder": [
+      "Soprano",
+      "Alto",
+      "Tenor",
+      "Bass"
+    ],
+    "labels": {
+      "rowLabel": "numbers",
+      "rowFirst": "top",
+      "colLabel": "letters",
+      "colOrder": "rtl"
+    },
+    "audienceAt": "top",
+    "walkOn": {
+      "rowFrom": "front",
+      "enterFrom": "both",
+      "perRow": [
+        null,
+        "left"
+      ],
+      "rowSeq": [
+        1,
+        0
+      ],
+      "splitCol": 1
+    },
+    "view": "2way"
+  },
+  "palettes": {
+    "active": "p2",
+    "schemes": [
+      {
+        "id": "p1",
+        "name": "Default",
+        "colours": {},
+        "splitColours": {}
+      },
+      {
+        "id": "p2",
+        "name": "Venue",
+        "colours": {
+          "Alto": "#1f8a70"
+        },
+        "splitColours": {
+          "Bass": {
+            "1": "#ff8800"
+          }
+        }
+      }
+    ]
+  },
+  "prefs": {
+    "mode": "stage"
+  }
+}

@@ -1,0 +1,12 @@
+# Normalise text to LF in the repo and let git decide the worktree. Later rules win, so the
+# catch-all goes first.
+*       text=auto
+
+*.png   binary
+*.ico   binary
+
+# Importer fixtures are byte-exact test inputs: 05 is deliberately LF-only with a
+# BOM, and a CRLF checkout would quietly turn it into a different test case.
+test/fixtures/import/*  -text
+test/fixtures/import/*.md  text
+test/fixtures/import/*.mjs text

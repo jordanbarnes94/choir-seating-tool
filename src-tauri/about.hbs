@@ -1,0 +1,11 @@
+The desktop app is also built from these Rust crates. Each licence text is given once, under the
+crates it covers.
+{{#each licenses}}
+
+{{{name}}} ({{id}}), for:
+{{#each used_by}}
+  {{crate.name}} {{crate.version}}{{#if crate.repository}}  {{crate.repository}}{{/if}}
+{{/each}}
+
+{{{text}}}
+{{/each}}

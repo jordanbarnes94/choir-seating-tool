@@ -1,0 +1,26 @@
+# cargo-about: the crates compiled into the desktop app, for THIRD-PARTY-NOTICES.txt
+# (tools/vite-notices.mjs runs it under `tauri build`).
+
+# A crate under any other licence fails the build, so that it is looked at before it ships. All of
+# these may be combined into an AGPL-3.0 program. MPL-2.0 asks for one thing more than its text:
+# that people are told where the source of those crates is, which the list does by naming each
+# crate's version and repository.
+accepted = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "MPL-2.0",
+]
+
+# The app's own crate is not somebody else's.
+private = { ignore = true }
+
+# The desktop app is built for Windows only.
+targets = ["x86_64-pc-windows-msvc"]
+
+# Build scripts run on the build machine and are not in the program.
+ignore-build-dependencies = true
+ignore-dev-dependencies = true

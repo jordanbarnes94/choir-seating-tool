@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- icon.svg's drawing at three quarters of its size, full-bleed, so that whatever shape the
+       system cuts the icon to, the seats stay inside it. -->
+  <rect width="512" height="512" fill="#0f172a"/>
+  <g transform="translate(256 256) scale(0.75) translate(-256 -256)">
+    <g fill="#bd8c00">
+      <rect x="58" y="88" width="84" height="84" rx="16"/>
+      <rect x="58" y="192" width="84" height="84" rx="16"/>
+      <rect x="58" y="296" width="84" height="84" rx="16"/>
+    </g>
+    <g fill="#2e74d9">
+      <rect x="162" y="88" width="84" height="84" rx="16"/>
+      <rect x="162" y="192" width="84" height="84" rx="16"/>
+      <rect x="162" y="296" width="84" height="84" rx="16"/>
+    </g>
+    <g fill="#c4317a">
+      <rect x="266" y="88" width="84" height="84" rx="16"/>
+      <rect x="266" y="192" width="84" height="84" rx="16"/>
+      <rect x="266" y="296" width="84" height="84" rx="16"/>
+    </g>
+    <g fill="#23844f">
+      <rect x="370" y="88" width="84" height="84" rx="16"/>
+      <rect x="370" y="192" width="84" height="84" rx="16"/>
+      <rect x="370" y="296" width="84" height="84" rx="16"/>
+    </g>
+    <rect x="58" y="404" width="396" height="20" rx="10" fill="#475569"/>
+  </g>
+</svg>

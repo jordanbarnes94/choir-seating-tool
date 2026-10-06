@@ -1,0 +1,295 @@
+/* The manual's own styles. tools/vite-manual.mjs serves them after src/base.css, in one file. */
+
+/* ---------- the page shell, as the app's (src/App.vue) ---------- */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid #1e293b;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 0.875rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.375rem;
+  transition: color 0.15s, background 0.15s;
+}
+.back-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+.back-arrow {
+  font-size: 1.1em;
+  line-height: 1;
+}
+.manual-page {
+  min-height: 100vh;
+  padding-top: 4rem;
+  background-color: oklch(20.8% 0.042 265.755);
+}
+/* ---------- the contents ---------- */
+.manual-wrap {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+.toc {
+  position: sticky;
+  top: 5rem;
+}
+.toctitle {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+}
+.toclist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: toc;
+}
+.toclist li {
+  counter-increment: toc;
+}
+.toclist a {
+  display: block;
+  padding: 0.35rem 0.75rem;
+  border-left: 2px solid #334155;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.toclist a::before {
+  content: counter(toc) '. ';
+  color: #64748b;
+}
+.toclist a:hover {
+  color: #f1f5f9;
+  border-left-color: #64748b;
+}
+.toclist a.on {
+  color: #93c5fd;
+  border-left-color: #60a5fa;
+  font-weight: 500;
+}
+.tocpick {
+  display: none;
+}
+.openapp {
+  display: inline-block;
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* ---------- a page ----------
+   The page itself is light, like the app: the screenshots are of a light interface and sit in
+   it without a hard frame. */
+.doc {
+  background: #fff;
+  color: #1e293b;
+  border-radius: 12px;
+  padding: 2rem 2.5rem;
+  font-weight: 400;
+  min-width: 0;
+}
+.doc h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.doc h2 {
+  margin: 2.25rem 0 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.doc h3 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.doc h2 a,
+.doc h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+.doc p,
+.doc li {
+  line-height: 1.65;
+}
+.doc p {
+  margin: 0 0 1rem;
+}
+.doc ul,
+.doc ol {
+  margin: 0 0 1rem;
+  padding-left: 1.4rem;
+}
+.doc ul {
+  list-style: disc;
+}
+.doc ol {
+  list-style: decimal;
+}
+.doc li {
+  margin: 0 0 0.35rem;
+}
+.doc strong {
+  font-weight: 600;
+  color: #0f172a;
+}
+.doc a {
+  color: #2563eb;
+}
+.doc code {
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: #f1f5f9;
+  font-size: 0.9em;
+}
+.doc img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.5rem 0 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+}
+/* A wide shot, `![…](x.png){.wide}` in the Markdown: shown at its real size in a horizontal
+   scroller, not shrunk to fit. The shots are taken at 2x, so it is zoomed to half its pixels, and
+   its border, corners, shadow and margins are doubled to come out as the other images'. */
+.doc p:has(> img.wide) {
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+.doc img.wide {
+  max-width: none;
+  zoom: 0.5;
+  margin: 1rem 0 1.5rem;
+  border-width: 2px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+}
+/* The app's drag tools, [⊘ Block]{.tool .block} in the Markdown: drawn like the buttons, in the app's font. */
+.doc .tool {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.85em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.doc .tool.block {
+  border: 2px solid #b9aeae;
+  background: repeating-linear-gradient(45deg, #e7e3e3 0 7px, #d8d2d2 7px 14px);
+  color: #6f6464;
+}
+.doc .tool.space {
+  border: 2px dashed #c9d0da;
+  background: #fff;
+  color: #6b7688;
+}
+.doc blockquote {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid #60a5fa;
+  background: #eff6ff;
+  border-radius: 0 6px 6px 0;
+  color: #1e3a8a;
+}
+.doc blockquote p:last-child {
+  margin: 0;
+}
+.doc table {
+  border-collapse: collapse;
+  margin: 0 0 1rem;
+}
+.doc th,
+.doc td {
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  vertical-align: top;
+}
+.pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+}
+.pager a {
+  font-weight: 500;
+  color: #2563eb;
+  text-decoration: none;
+}
+.pager .next {
+  margin-left: auto;
+}
+
+@media (max-width: 800px) {
+  .manual-wrap {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding-top: 1rem;
+  }
+  .toc {
+    position: static;
+  }
+  .toclist {
+    display: none;
+  }
+  .tocpick {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #f1f5f9;
+  }
+  .openapp {
+    margin-top: 0.75rem;
+  }
+  .doc {
+    padding: 1.25rem 1rem;
+  }
+}
+
+/* In a window of its own (public/app-window.js) the manual is part of the app, not a page of
+   the website: no bar back to it. */
+:root.app-window .topbar {
+  display: none;
+}
+:root.app-window .manual-page {
+  padding-top: 0;
+}
+:root.app-window .toc {
+  top: 2rem;
+}

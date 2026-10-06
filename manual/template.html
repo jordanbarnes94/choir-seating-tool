@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}} - Choir Seating Tool Manual</title>
+    <meta name="description" content="{{description}}">
+    <meta property="og:title" content="{{title}} - Choir Seating Tool Manual">
+    <meta property="og:description" content="{{description}}">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="icon" type="image/svg+xml" href="../icon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+    <link rel="stylesheet" href="manual.css">
+    <script src="../app-window.js"></script>
+  </head>
+  <body>
+    <div class="topbar">
+      <a href="{{homepage}}" class="back-link"><span class="back-arrow" aria-hidden="true">←</span>About Choir Seating Tool</a>
+    </div>
+    <main class="manual-page">
+      <div class="manual-wrap">
+        <!-- The contents: a sidebar on a wide screen, a picker on a phone. -->
+        <nav class="toc" aria-label="Manual contents">
+          <p class="toctitle">Choir Seating Tool Manual</p>
+          <ol class="toclist">
+{{toc}}
+          </ol>
+          <select class="tocpick" aria-label="Manual page" onchange="location.href = this.value">
+{{picker}}
+          </select>
+          <a href="../" class="openapp">Open Choir Seating Tool →</a>
+        </nav>
+
+        <article class="doc">
+{{content}}
+          <footer class="pager">{{pager}}</footer>
+        </article>
+      </div>
+    </main>
+  </body>
+</html>

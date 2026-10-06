@@ -1,0 +1,12 @@
+node_modules
+dist
+
+# The desktop app's build output
+src-tauri/target
+src-tauri/gen/schemas
+
+# Scratch files, and the older arranger.js that tools/lateral-check.mjs compares against.
+.smoke
+
+*.log
+.DS_Store
