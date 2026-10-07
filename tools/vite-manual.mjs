@@ -1,13 +1,14 @@
 /*
  * vite-manual — the user manual, as static pages inside the app's build.
  *
- * Each manual/*.md becomes manual/<slug>.html through manual/template.html, styled by
- * manual/manual.css on top of the app's src/base.css, with the screenshots beside them. The pages
+ * Each manual/*.md becomes manual/<slug>/index.html through manual/template.html, styled by
+ * manual/manual.css on top of the app's src/base.css, with the screenshots in manual/. A page's
+ * address is its folder, /manual/<slug>/, as it was when the website rendered the manual. The pages
  * are emitted by the Vite build itself, not by a script run after it, so that the service worker
  * precaches them with everything else. `npm run dev` serves the same pages from /manual/.
  *
  * The pages link to each other as Markdown files (`arranging.md#moving-singers`), which is what
- * makes the manual readable in the repository on GitHub. The built page links to the `.html`.
+ * makes the manual readable in the repository on GitHub. The built page links to the folder.
  * manual/README.md is the contents list GitHub shows for the folder. It is not a page and is not
  * in the build, and the build fails unless it links to every page, in order.
  *
@@ -58,17 +59,10 @@ function frontMatter(file, text) {
   return { meta: { ...meta, order: Number(meta.order) }, body: text.slice(m[0].length) };
 }
 
-// A link to another page names its Markdown file. The built page's link is to the page built from it.
-const toBuilt = (href) => href.replace(/^([^/#:]+)\.md(?=#|$)/, '$1.html');
-
-// Every link target and image a page names, read off the parsed tokens. Links are left pointing
-// at the built pages.
+// Every link target and image a page names, read off the parsed tokens.
 function references(tokens, out = { links: [], images: [], ids: [] }) {
   for (const t of tokens) {
-    if (t.type === 'link_open') {
-      out.links.push(t.attrGet('href'));
-      t.attrSet('href', toBuilt(t.attrGet('href')));
-    }
+    if (t.type === 'link_open') out.links.push(t.attrGet('href'));
     if (t.type === 'image') out.images.push(t.attrGet('src'));
     if (t.type === 'heading_open' && t.attrGet('id')) out.ids.push(t.attrGet('id'));
     if (t.children) references(t.children, out);
@@ -82,12 +76,25 @@ const CONTENTS = 'README.md';
 function loadPages() {
   const pages = readdirSync(DIR).filter((f) => f.endsWith('.md') && f !== CONTENTS).map((file) => {
     const { meta, body } = frontMatter(file, read(file));
-    const env = {};
-    const tokens = md.parse(body, env);
-    const named = references(tokens); // before rendering: it points the links at the built pages
-    return { file, slug: file.slice(0, -3), ...meta, html: md.renderer.render(tokens, md.options, env), ...named };
+    return { file, slug: file.slice(0, -3), ...meta, body, ...references(md.parse(body, {})) };
   });
   return pages.sort((a, b) => a.order - b.order);
+}
+
+// A page's Markdown as HTML. `root` is the way from the built page to manual/, where the
+// screenshots are. A link to another page names its Markdown file, and becomes that page's folder.
+function content(p, root) {
+  const env = {};
+  const tokens = md.parse(p.body, env);
+  const point = (list) => {
+    for (const t of list) {
+      if (t.type === 'link_open') t.attrSet('href', t.attrGet('href').replace(/^([^/#:]+)\.md(?=#|$)/, root + '$1/'));
+      if (t.type === 'image') t.attrSet('src', root + t.attrGet('src'));
+      if (t.children) point(t.children);
+    }
+  };
+  point(tokens);
+  return md.renderer.render(tokens, md.options, env);
 }
 
 function problems(pages, images) {
@@ -111,18 +118,19 @@ function problems(pages, images) {
   return found;
 }
 
-function page(p, pages, template, homepage) {
+function page(p, pages, template, homepage, root) {
   const at = pages.indexOf(p);
   const prev = pages[at - 1], next = pages[at + 1];
   const fields = {
     title: esc(p.title),
     description: esc(p.description),
     homepage: esc(homepage),
-    toc: pages.map((q) => `            <li><a href="${q.slug}.html"${q === p ? ' class="on" aria-current="page"' : ''}>${esc(q.title)}</a></li>`).join('\n'),
-    picker: pages.map((q) => `            <option value="${q.slug}.html"${q === p ? ' selected' : ''}>${esc(q.title)}</option>`).join('\n'),
-    content: p.html,
-    pager: (prev ? `<a href="${prev.slug}.html" class="prev">← ${esc(prev.title)}</a>` : '')
-      + (next ? `<a href="${next.slug}.html" class="next">${esc(next.title)} →</a>` : '')
+    root,
+    toc: pages.map((q) => `            <li><a href="${root}${q.slug}/"${q === p ? ' class="on" aria-current="page"' : ''}>${esc(q.title)}</a></li>`).join('\n'),
+    picker: pages.map((q) => `            <option value="${root}${q.slug}/"${q === p ? ' selected' : ''}>${esc(q.title)}</option>`).join('\n'),
+    content: content(p, root),
+    pager: (prev ? `<a href="${root}${prev.slug}/" class="prev">← ${esc(prev.title)}</a>` : '')
+      + (next ? `<a href="${root}${next.slug}/" class="next">${esc(next.title)} →</a>` : '')
   };
   return template.replace(/\{\{(\w+)\}\}/g, (m, key) => {
     if (!(key in fields)) throw new Error(`manual/template.html: unknown placeholder ${m}`);
@@ -142,9 +150,9 @@ export function renderManual(homepage) {
   if (found.length) throw new Error('The manual has references that do not resolve:\n  ' + found.join('\n  '));
   const template = read('template.html');
   const files = new Map();
-  for (const p of pages) files.set(`manual/${p.slug}.html`, page(p, pages, template, homepage));
-  // manual/ opens on the first page. Its links are relative, so the same HTML serves both paths.
-  files.set('manual/index.html', files.get(`manual/${pages[0].slug}.html`));
+  for (const p of pages) files.set(`manual/${p.slug}/index.html`, page(p, pages, template, homepage, '../'));
+  // manual/ opens on the first page, rendered again for a page that is in manual/ itself.
+  files.set('manual/index.html', page(pages[0], pages, template, homepage, ''));
   files.set('manual/manual.css', readFileSync(BASE_CSS, 'utf8') + '\n' + read('manual.css'));
   return { files, images };
 }
@@ -173,11 +181,17 @@ export default function manual({ homepage }) {
           return res.end();
         }
         if (!path.startsWith('/manual/')) return next();
-        const name = path === '/manual/' ? 'manual/index.html' : path.slice(1);
+        const name = path.endsWith('/') ? path.slice(1) + 'index.html' : path.slice(1);
         res.setHeader('Content-Type', TYPES[name.split('.').pop()] || 'application/octet-stream');
         try {
           const { files, images } = renderManual(homepage);
           if (files.has(name)) return res.end(files.get(name));
+          // A page's links are relative to its folder, so it is only served with the slash.
+          if (files.has(name + '/index.html')) {
+            res.statusCode = 302;
+            res.setHeader('Location', path + '/');
+            return res.end();
+          }
           if (images.includes(name.slice('manual/'.length))) return res.end(readFileSync(DIR + name.slice('manual/'.length)));
         } catch (e) {
           res.statusCode = 500;

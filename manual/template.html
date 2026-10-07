@@ -9,11 +9,11 @@
     <meta property="og:description" content="{{description}}">
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#0f172a">
-    <link rel="icon" type="image/svg+xml" href="../icon.svg">
-    <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
-    <link rel="apple-touch-icon" href="../apple-touch-icon.png">
-    <link rel="stylesheet" href="manual.css">
-    <script src="../app-window.js"></script>
+    <link rel="icon" type="image/svg+xml" href="{{root}}../icon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{root}}../icon-192.png">
+    <link rel="apple-touch-icon" href="{{root}}../apple-touch-icon.png">
+    <link rel="stylesheet" href="{{root}}manual.css">
+    <script src="{{root}}../app-window.js"></script>
   </head>
   <body>
     <div class="topbar">
@@ -30,7 +30,7 @@
           <select class="tocpick" aria-label="Manual page" onchange="location.href = this.value">
 {{picker}}
           </select>
-          <a href="../" class="openapp">Open Choir Seating Tool →</a>
+          <a href="{{root}}../" class="openapp">Open Choir Seating Tool →</a>
         </nav>
 
         <article class="doc">
