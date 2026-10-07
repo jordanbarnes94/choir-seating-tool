@@ -1,6 +1,6 @@
 {
   "name": "choir-seating-tool",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Seat a choir so every singer keeps a neighbour from each of their voice-part splits. Runs entirely in the browser.",
   "license": "AGPL-3.0-only",

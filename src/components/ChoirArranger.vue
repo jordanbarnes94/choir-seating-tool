@@ -281,7 +281,7 @@
             <li><b>Share it.</b> <b>Print / Save as PDF</b>, or <b>Download spreadsheet</b>. The <b>Walk-on order</b> tab gives the order to file on.</li>
           </ol>
           <p>The example choir and its two concerts are there to try things on: change them or delete them as you like. Hover over a button for a short note on what it does.</p>
-          <p><a class="helplink" href="manual/getting-started.html" target="_blank">Read the full user manual →</a></p>
+          <p><a class="helplink" href="manual/getting-started/" target="_blank">Read the full user manual →</a></p>
           <p class="helpnote">Everything is saved in this browser, on this device only. Use <b>Save backup file</b> in <b>Settings</b> (the cogwheel) to keep a copy or move to another device.</p>
         </div>
       </div>

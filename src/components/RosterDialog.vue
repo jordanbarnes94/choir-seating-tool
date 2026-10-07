@@ -28,7 +28,7 @@
       </button>
     </div>
 
-    <div class="rosterbody">
+    <div ref="scroller" class="rosterbody">
       <div
         id="rosterpanel"
         class="rosterwrap"
@@ -646,6 +646,9 @@ import LabelPreview from './LabelPreview.vue';
 
 const store = useChoirArranger();
 const dlg = ref(null);
+// The one element that scrolls, whichever screen or tab is showing.
+const scroller = ref(null);
+const toTop = () => { if (scroller.value) scroller.value.scrollTop = 0; };
 
 /*
  * EVERY TAB EDITS A WORKING COPY. The Roster tab edits a draft of one roster, the Concert tab a
@@ -691,6 +694,7 @@ function goTab(next, after) {
   guardLayer(tab.value, () => {
     tab.value = next;
     reloadLayer(next);
+    toTop();
     if (after) after();
   }, 'Save them before leaving this tab?');
 }
@@ -733,6 +737,7 @@ watch(() => store.rosterOpen.value, (open) => {
     msgUI.open = false;
   }
   syncDialog(open);
+  if (open) toTop();
 });
 onMounted(() => {
   if (store.rosterOpen.value) {

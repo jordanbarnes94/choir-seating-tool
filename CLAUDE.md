@@ -17,9 +17,10 @@ rules that are easy to break. `README.md` is for people who use or host the app.
   `npm run preview` serves it.
 - `npm test` runs `node --test "test/*.test.js"` and covers the pure `src/utils/`: persistence,
   plan factory and field list, singer ids, the concert library, colours, palettes, seat labels,
-  seat preview, stage layout, export, print, walk-on list, spreadsheet import and the solver. The
-  glob is deliberate. `node --test` with no argument treats *every* file under `test/` as a test,
-  which would run `test/fixtures/import/make-fixtures.mjs`.
+  seat preview, stage layout, export, print, walk-on list, spreadsheet import and the solver. It
+  also checks the manual's built pages (`tools/vite-manual.mjs`). The glob is deliberate.
+  `node --test` with no argument treats *every* file under `test/` as a test, which would run
+  `test/fixtures/import/make-fixtures.mjs`.
 - `node tools/store-smoke.mjs` drives the LIVE store headlessly, which `npm test` does not: it
   imports the store and runs it against stubbed browser globals. It is a tool, not a test. Run it
   after anything that touches `SCHEMA`, the stored shape or the seating array. It is the only

@@ -1056,16 +1056,20 @@ writes the file.
 
 `manual/*.md` is the user manual, one page per part of the app, with `title`, `description` and
 `order` (the sidebar order) in its front matter. `tools/vite-manual.mjs` is a Vite plugin that
-renders each page with markdown-it into `manual/<slug>.html` through `manual/template.html`, with
-`manual/manual.css` served after `base.css` as one file, and the screenshots beside them.
-`manual/index.html` is the first page. The dev server serves the same pages at `/manual/`.
+renders each page with markdown-it into `manual/<slug>/index.html` through `manual/template.html`,
+with `manual/manual.css` served after `base.css` as one file, and the screenshots in `manual/`.
+A page's address is its folder, `/manual/<slug>/`: that is where the website had the manual
+before the tool built it, and where search engines and bookmarks still point.
+`manual/index.html` is the first page again, rendered for one folder higher. The dev server
+serves the same pages at `/manual/`.
 
 * Links between pages name the Markdown file (`arranging.md#moving-singers`), and the plugin
-  points the built page's link at the `.html`. That is what lets the manual be read in the
+  points the built page's link at that page's folder. That is what lets the manual be read in the
   repository on GitHub, which `README.md` links to. `manual/README.md` is the contents list
   GitHub shows for the folder: it is not a page and is not in the build, and the build fails
   unless it links to every page, in order. Images are relative too (`stage.png`), so the
-  manual works wherever the build is put.
+  manual works wherever the build is put. `test/manual.test.js` checks that everything a built
+  page names is in the build.
 * A heading's id is its letters and digits joined by hyphens (`headingId()`). Links into the manual
   depend on the ids, so rewording a heading breaks them.
 * **The build fails** on a link to a page or heading that does not exist, or an image that is not in
@@ -1166,6 +1170,7 @@ it: there is no capability file, so the page has no access to Tauri's API. Build
 * **`npm test`** runs `node --test "test/*.test.js"` with no dependencies. It covers the pure modules only:
   `persistence`, `plan`, `plan-view`, `singer-ids`, `library`, `colour`, `palettes`, `labels`,
   `seat-preview`, `stage-layout`, `export`, `print`, `walk-on`, `import`, `solver`.
+  `manual` is the exception: it checks the pages `tools/vite-manual.mjs` builds.
   The glob is deliberate: `node --test` with no
   argument treats every file under `test/` as a test, which would run
   `test/fixtures/import/make-fixtures.mjs`.
