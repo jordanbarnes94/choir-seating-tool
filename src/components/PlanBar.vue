@@ -394,6 +394,10 @@ function onAddPreview(e) {
   .pmore .morebtn {
     width: 100%;
   }
+  /* in the middle of its half, where Save changes is when there is something to save */
+  .psaved {
+    text-align: center;
+  }
   .moremenu {
     left: auto;
     right: 0;

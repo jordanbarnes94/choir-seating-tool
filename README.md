@@ -21,15 +21,15 @@ bottom of the page.
 
 ## Install it
 
-The hosted copy can be installed like an app: it opens in a window of its own, and works offline
-once it has been opened. In Chrome or Edge, click **Install app** at the top of the page. The
+The hosted copy can be installed as an app, with its own window and icon. It works offline once
+it has been opened. In Chrome or Edge, click **Install app** at the top of the page. The
 manual's [Settings and backup](manual/settings-and-backup.md) page covers other browsers, and how
 to move your work between devices with a backup file.
 
 ## Download it for Windows
 
 Every [release](https://github.com/jordanbarnes94/choir-seating-tool/releases/latest) also has the app
-for Windows 10 and 11, in a window of its own, in two forms:
+for Windows 10 and 11, in two forms:
 
 - `Choir-Seating-Tool.exe` is one file with nothing to install: double-click it. When a newer version
   is out it says so, and you download the new file in its place.
@@ -74,7 +74,7 @@ What is in the repository:
 | `src/` | the app |
 | `manual/` | the user manual: Markdown pages, their screenshots, and the page template |
 | `public/` | files copied into the build as they are: the icons and `app-window.js` |
-| `src-tauri/` | the desktop app: a small Rust shell that shows the build in a window of its own |
+| `src-tauri/` | the desktop app: a small Rust shell that shows the build in its own window |
 | `test/` | the automated tests and their fixture files |
 | `tools/` | scripts run by hand, and the plugins that build the manual and the third-party notices |
 | `.github/` | the workflows: checks on every push, and a release on a version tag |

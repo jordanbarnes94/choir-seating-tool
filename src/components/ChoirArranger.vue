@@ -39,9 +39,9 @@
           <button class="tab" role="tab" :aria-selected="store.ui.tab === 'walkon'" :class="{ on: store.ui.tab === 'walkon' }" @click="store.ui.tab = 'walkon'">Walk-on order</button>
         </div>
         <div v-if="store.data.value.length" class="outputs">
-          <!-- Print. The button, and its options in a small popover beside it. A
-               legibility warning shows as a mark on the options button. -->
-          <div ref="printBox" class="outbox">
+          <!-- Print. One button in two parts: the left prints, the right opens its options in a
+               small popover. A legibility warning shows as a mark on the options part. -->
+          <div ref="printBox" class="outbox printsplit">
             <button class="cbtn printbtn" type="button" @click="printPlan">
               <svg class="picon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 6 2 18 2 18 9" />
@@ -77,7 +77,7 @@
               <label class="pmrow">
                 <span class="pmlabel">Names</span>
                 <select v-model="printNameStyle" class="csel">
-                  <option value="full">Full</option>
+                  <option value="full">Full names</option>
                   <option value="short">First name + initial (prints larger)</option>
                 </select>
               </label>
@@ -666,6 +666,22 @@ onBeforeUnmount(() => {
   position: relative;
   display: flex;
   gap: 6px;
+}
+/* Print and Options are joined, so the options read as Print's own and not as a third output. */
+.printsplit {
+  gap: 0;
+}
+.choir-app .printsplit > .printbtn {
+  border-radius: 6px 0 0 6px;
+}
+.choir-app .printsplit > .printmore {
+  margin-left: -1px;
+  border-radius: 0 6px 6px 0;
+}
+/* the focus ring goes over the other half, not under it */
+.choir-app .printsplit > .cbtn:focus-visible {
+  position: relative;
+  z-index: 1;
 }
 /* An inline printer, not the 🖨 emoji: Windows draws that as a flat, unreadable glyph. */
 .picon {
