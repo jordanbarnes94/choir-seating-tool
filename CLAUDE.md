@@ -42,6 +42,13 @@ rules that are easy to break. `README.md` is for people who use or host the app.
 
 CI runs the tests, the store smoke tool and the build on every push.
 
+## Branches and pull requests
+
+`main` is a straight line of commits, one for each change. Work is done on a branch. Before its
+pull request is opened the branch is squashed to one commit on top of `main`, and the pull
+request is merged by rebasing (`gh pr merge --rebase`), never with a merge commit. The commit's
+subject says what is now true ("The manual's pages are folders again"), and its body says why.
+
 ## Releasing
 
 A release is a version tag. `.github/workflows/release.yml` builds once and attaches that build to
@@ -52,13 +59,21 @@ there is a newer version. The names are the same in every release, so
 `https://github.com/jordanbarnes94/choir-seating-tool/releases/latest/download/<name>` is always
 the newest, and the website's download page links to those.
 
-1. Set `version` in `package.json`, run `npm install` so `package-lock.json` follows, commit, push,
-   and wait for CI to pass.
-2. Tag that commit `v<version>` and push the tag. The workflow fails if the tag and `package.json`
-   disagree.
-3. Check that the Release has the zip and the three desktop files, and that `latest.json` names
+The version is chosen in `package.json`, on the branch, and not when tagging: the tag only names
+what `package.json` already says. Every change that is to reach people gets the next version, a
+change to the desktop app alone included, because `latest.json` is how an installed copy learns
+of it. The released version is the newest tag (`git tag --sort=-v:refname`), so the next one is
+one above that, whatever `package.json` says on an unfinished branch.
+
+1. On the branch that carries the change, set `version` in `package.json` and run `npm install`
+   so `package-lock.json` follows. Both go in the same commit as the change, whose message ends
+   "Version <version>."
+2. Open the pull request, wait for CI to pass, and merge it (see "Branches and pull requests").
+3. Tag the resulting commit on `main` as `v<version>` and push the tag. The workflow fails if the
+   tag and `package.json` disagree.
+4. Check that the Release has the zip and the three desktop files, and that `latest.json` names
    the new version.
-4. The web copy goes live when the website is next published: until then it stays on the release
+5. The web copy goes live when the website is next published: until then it stays on the release
    before. Afterwards, check that `https://jordanbarnes.uk/projects/choir-seating/version.json`
    shows the new version and commit.
 

@@ -1139,6 +1139,15 @@ it: there is no capability file, so the page has no access to Tauri's API. Build
 * The manual opens in a second window, and there is only ever one: asked for again, it comes
   forward on the page asked for. "Open Choir Seating Tool" in it brings the app's window forward.
   Closing the app's window closes the manual's and ends the program.
+* **`lib.rs` makes the manual's window itself, and never hands one to the web view.**
+  `on_new_window` always answers `NewWindowResponse::Deny`, and builds the window on the address
+  asked for. Answered with `Create { window }`, the first load is WebView2's own, into contents
+  it swaps in, and is not offered to the program's files: it goes out as
+  `http://tauri.localhost/…`, which is port 80 of this machine. With a web server there the
+  window showed its 404 page until **Manual** was clicked again; with none it showed the web
+  view's error page for a moment, which then loaded itself again and got the manual. Versions
+  1.0.0 and 1.0.1 did this. `pwsh tools/desktop-manual-check.ps1` is the check, and it only
+  means something with a server listening on port 80.
 * Neither window can be taken out of the app. A link to anywhere else opens in the browser.
   **Licences** in the footer opens `THIRD-PARTY-NOTICES.txt` in the manual's window.
 * `tauri-plugin-opener` is built with `open_js_links_on_click(false)`. Left on, its script takes
@@ -1161,7 +1170,8 @@ it: there is no capability file, so the page has no access to Tauri's API. Build
 * **To drive it from a test**, build with `--debug` and set `CHOIR_SEATING_BROWSER_ARGS` to
   `--remote-debugging-port=<port>`: Playwright's `connectOverCDP` then reaches the pages in both
   windows. A release build ignores the variable. `WEBVIEW2_USER_DATA_FOLDER` points the web view
-  at a throwaway folder, so a test never touches real work.
+  at a throwaway folder, so a test never touches real work. The app does not behave quite as
+  shipped with the debugging port on: the manual window's fault above did not show under it.
 
 ---
 

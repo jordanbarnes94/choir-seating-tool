@@ -189,8 +189,12 @@ pub fn run() {
           open_in_browser(&navigating, url);
           false
         })
-        // The manual, the source link and the notices ask for a window of their own.
-        .on_new_window(move |url, features| {
+        // The manual, the source link and the notices ask for a window of their own. The answer is
+        // always `Deny`, and the manual's window is made here on the address asked for. Handed
+        // to the web view with `Create`, a window's first load is the web view's own and is not
+        // offered to the program's files: it goes to port 80 of this machine, for a web server's
+        // 404 page where there is one and an error page where there is not.
+        .on_new_window(move |url, _features| {
           if !in_manual(&url) {
             if !in_app(&url) {
               open_in_browser(&handle, &url);
@@ -204,8 +208,7 @@ pub fn run() {
             return NewWindowResponse::Deny;
           }
           let back = handle.clone();
-          let manual = window(&handle, MANUAL, WebviewUrl::External("about:blank".parse().unwrap()))
-            .window_features(features)
+          let _ = window(&handle, MANUAL, WebviewUrl::External(url))
             .title("Choir Seating Tool - Manual")
             .inner_size(1100.0, 800.0)
             .min_inner_size(360.0, 400.0)
@@ -223,7 +226,7 @@ pub fn run() {
             // "Open Choir Seating Tool" in the manual brings the app's window forward. It does not
             // start a second copy of the app in this one.
             .on_navigation(move |url| {
-              if in_manual(url) || url.scheme() == "about" {
+              if in_manual(url) {
                 return true;
               }
               if in_app(url) {
@@ -234,10 +237,7 @@ pub fn run() {
               false
             })
             .build();
-          match manual {
-            Ok(window) => NewWindowResponse::Create { window },
-            Err(_) => NewWindowResponse::Deny,
-          }
+          NewWindowResponse::Deny
         })
         .build()?;
       Ok(())
