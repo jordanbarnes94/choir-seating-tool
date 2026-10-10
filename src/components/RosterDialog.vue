@@ -84,7 +84,7 @@
               <b>Roster</b>
               <span class="hint">a list of singers — each concert takes its singers from one roster</span>
             </div>
-            <div class="ctlrow">
+            <div class="ctlrow libctl">
               <button class="pbtn" :disabled="busyUI" @click="guardLayer('roster', () => startNaming('newroster'), 'Make a new roster and lose them?')">New…</button>
               <!-- Picking only chooses; Load is what replaces the roster being edited. -->
               <select v-model="pickedRosterId" class="presetsel grpstart" :disabled="busyUI">
@@ -168,7 +168,7 @@
               <b>Concert</b>
               <span class="hint">who is singing, how they split, and as many seating plans as you like</span>
             </div>
-            <div class="ctlrow">
+            <div class="ctlrow libctl">
               <button class="pbtn" :disabled="busyUI" @click="guardLayer('concert', startCreate, 'Make a new concert and lose them?')">New…</button>
               <!-- Picking only chooses; Load is what replaces the stage, so a stray pick costs nothing. -->
               <select v-model="pickedConcertId" class="presetsel grpstart" :disabled="busyUI">
@@ -436,7 +436,7 @@
               <b>Colours</b>
               <span class="hint">used for every concert and seating plan</span>
             </div>
-            <div class="ctlrow">
+            <div class="ctlrow libctl">
               <button class="pbtn" :disabled="busyUI" @click="guardLayer('settings', () => startNaming('newscheme'), 'Make a new colour scheme and lose them?')">New…</button>
               <!-- Picking only chooses; Load is what changes the colours the stage paints with. -->
               <select v-model="pickedSchemeId" class="presetsel grpstart" :disabled="busyUI">
@@ -2528,9 +2528,14 @@ table.roster .delrow {
     min-width: 0;
     max-width: none;
   }
-  /* Presets is the one row with an odd number of buttons, so its last one — Delete — spans
-     the pair rather than leaving a half-width gap beside it. */
-  .presetctl > .pbtn:last-child {
+  /* the wider gap that opens a group on a wide screen would push its control out of line here */
+  .ctlrow .grpstart {
+    margin-left: 0;
+  }
+  /* New…, the picker and Delete take a line each, with Load, Save, Save as… and Rename in pairs
+     between: six buttons round a full-width picker left New… and Delete each half a line. */
+  .libctl > .pbtn:first-child,
+  .libctl > .pbtn:last-child {
     grid-column: 1 / -1;
   }
   .presetsel,

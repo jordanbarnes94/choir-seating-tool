@@ -36,7 +36,7 @@ Save a backup before a big change, and whenever you have done work you wouldn't 
 
 ## Use it as an app, and offline
 
-Choir Seating Tool can open in a window of its own, with its own icon, in place of a browser tab. There are two ways, and both work without an internet connection, manual included.
+Choir Seating Tool can run as an app, with its own window and icon, instead of in a browser tab. There are two ways, and both work without an internet connection, manual included.
 
 ### Install it from the browser
 

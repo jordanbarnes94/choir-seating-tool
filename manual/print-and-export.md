@@ -10,7 +10,7 @@ order: 8
 
 **Print / Save as PDF** prints the seating plan on the stage, A4 landscape, filling the page. For a PDF, choose **Save as PDF** in the print dialogue.
 
-**Options** beside it:
+**Options**, the right-hand part of the same button:
 
 ![Print options](print-options.png)
 
