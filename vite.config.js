@@ -58,7 +58,9 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
     __APP_HOMEPAGE__: JSON.stringify(pkg.homepage),
-    __APP_AUTHOR__: JSON.stringify(pkg.author),
+    __APP_DOWNLOAD__: JSON.stringify(pkg.downloadPage),
+    __APP_AUTHOR__: JSON.stringify(pkg.author.name),
+    __APP_AUTHOR_SITE__: JSON.stringify(pkg.author.url),
     __APP_REPOSITORY__: JSON.stringify(pkg.repository.url.replace(/^git\+/, '').replace(/\.git$/, ''))
   },
   // IPv4, as the tools address it: `localhost` can resolve to ::1.

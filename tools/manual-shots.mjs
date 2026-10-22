@@ -82,11 +82,12 @@ const tipOff = () => page.mouse.move(2, 2);
 try {
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
   await page.locator('.cell').first().waitFor();
+  // No top bar in any shot, the overview included: its links and buttons are the website's, and
+  // the manual is read in the desktop app too. It would also sit over any element shot taken
+  // under it, and a toast from one step ("Arranged …") would still be showing in the next step's
+  // shot.
+  await page.addStyleTag({ content: '.topbar, .toast { display: none !important; } .choir-page { padding-top: 1.5rem !important; }' });
   await shot('overview', null);
-  // After the overview, which shows the page as it is: the fixed top bar would sit over any
-  // element shot taken under it, and a toast from one step ("Arranged …") would still be
-  // showing in the next step's shot.
-  await page.addStyleTag({ content: '.topbar, .toast { display: none !important; }' });
   // With a little air round it: the bar has no padding of its own, and the manual's rounded
   // frame would otherwise cut across the corners of the concert's name and the Compare picker.
   const planbar = page.locator('.planbar');

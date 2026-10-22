@@ -11,6 +11,13 @@
       >
         Install app
       </button>
+      <a
+        :href="downloadPage"
+        class="install download"
+        data-tip="Download the Windows app: a single file to run, or an installer."
+      >
+        Download
+      </a>
       <!-- Asked, never automatic: a reload would throw away an unsaved draft in Choir setup. -->
       <p v-if="update.ready" class="newversion" role="status">
         A new version is ready.
@@ -49,9 +56,9 @@ defineProps({
 });
 
 const homepage = __APP_HOMEPAGE__;
-// The author's website is the one the about page is on.
+const downloadPage = __APP_DOWNLOAD__;
 const author = __APP_AUTHOR__;
-const authorSite = new URL('/', homepage).href;
+const authorSite = __APP_AUTHOR_SITE__;
 const repository = __APP_REPOSITORY__;
 const version = __APP_VERSION__;
 
@@ -128,6 +135,10 @@ function install() {
   transition: border-color 0.15s, background 0.15s;
 }
 
+.download {
+  text-decoration: none;
+}
+
 .install:hover {
   border-color: #94a3b8;
   background: rgba(255, 255, 255, 0.06);
@@ -186,10 +197,11 @@ function install() {
 
 /* ---------- in a window of its own ----------
    An installed copy, or the desktop app (public/app-window.js marks <html>), is not a page of
-   the website. There is no link back, and no bar at all unless a new version is waiting to be
-   announced in it. And the app is the window: it fills it, white to the edges, with no dark
-   page round a card. ChoirArranger.vue takes the card's border and corners off. */
-:root.app-window .back-link {
+   the website. There is no link back or to the download page, and no bar at all unless a new
+   version is waiting to be announced in it. And the app is the window: it fills it, white to the
+   edges, with no dark page round a card. ChoirArranger.vue takes the card's border and corners off. */
+:root.app-window .back-link,
+:root.app-window .download {
   display: none;
 }
 :root.app-window .topbar:not(:has(.newversion)) {

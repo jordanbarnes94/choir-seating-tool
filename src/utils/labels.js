@@ -76,8 +76,8 @@ export const LABEL_DEFAULTS = Object.freeze({
 export const LABEL_SEP = '-';
 
 /**
- * Spreadsheet-style letters for a 0-based index: A, B, … Z, AA, AB, … The grid allows 40 columns
- * (COLS_MAX in utils/persistence.js), so the AA range is reachable in normal use rather than
+ * Spreadsheet-style letters for a 0-based index: A, B, … Z, AA, AB, … The grid allows 50 columns
+ * (COLS_MAX in utils/arranger.js), so the AA range is reachable in normal use rather than
  * theoretical, which is why this is bijective base-26 and not a single letter that runs out.
  * @param {number} n 0-based index
  * @returns {string} the letters, or '' for anything that is not a non-negative number

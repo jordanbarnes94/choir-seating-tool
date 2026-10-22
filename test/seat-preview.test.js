@@ -13,7 +13,7 @@ import assert from 'node:assert/strict';
 
 import { PREVIEW_MAX_COLS, previewLayout, startSeatLabel } from '../src/utils/seatPreview.js';
 import { LABEL_OPTIONS, colLabelAt, rowLabelAt, seatLabelFor } from '../src/utils/labels.js';
-import { COLS_MAX, ROWS_MAX } from '../src/utils/persistence.js';
+import { COLS_MAX, ROWS_MAX } from '../src/utils/arranger.js';
 
 // every legal combination of the four labelling settings: 2^4 = 16.
 function allLabelCombos() {

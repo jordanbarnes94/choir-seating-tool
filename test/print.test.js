@@ -31,7 +31,7 @@ import {
   printableArea,
   reservedHeight,
   sheetGeometry,
-  splitColumn,
+  splitColumns,
   textEm,
   sheetTitle,
   stageChromeW,
@@ -196,38 +196,63 @@ test('a stage that prints readably stays on one page', () => {
   assert.ok(pages[0].geo.namePt >= READABLE_PT);
 });
 
-test('Auto puts a wide stage on two pages, only when one would be too small to read', () => {
+test('a wide stage goes across the fewest pages that print every name at READABLE_PT', () => {
   const stage = stageOf(24, 4);
-  const one = printPages({ stage, names: namesOf(stage), split: 'one' });
-  assert.equal(one.length, 1);
-  assert.ok(one[0].geo.namePt < READABLE_PT);
-  const auto = printPages({ stage, names: namesOf(stage) });
-  assert.equal(auto.length, 2);
-  assert.ok(auto[0].geo.namePt > one[0].geo.namePt);
+  const pages = printPages({ stage, names: namesOf(stage) });
+  assert.ok(pages.length > 1);
+  assert.ok(pages[0].geo.namePt >= READABLE_PT);
+  const n = pages.length - 1;
+  const fewer = sheetGeometry({ cols: Math.ceil(24 / n), rows: 4, names: ['Ekaterina Battersby'] });
+  assert.ok(fewer.namePt < READABLE_PT, 'one page fewer would print too small');
 });
 
-test('the two halves share every column once, in order, at one cell size', () => {
-  const stage = stageOf(19, 4);
-  const [a, b] = printPages({ stage, names: namesOf(stage), split: 'two' });
-  assert.equal(a.cols + b.cols, 19);
-  assert.deepEqual([...a.slots, ...b.slots], stage.slots);
-  assert.deepEqual([...a.colHeads, ...b.colHeads], stage.colHeads);
-  assert.deepEqual(a.geo, b.geo);
-  assert.match(a.part, /left/);
-  assert.match(b.part, /right/);
+test('the pages share every column once, in order, at one cell size, and say which they are', () => {
+  const stage = stageOf(50, 6);
+  const pages = printPages({ stage, names: namesOf(stage) });
+  assert.ok(pages.length >= 3);
+  assert.equal(pages.reduce((t, p) => t + p.cols, 0), 50);
+  assert.deepEqual(pages.flatMap((p) => p.slots), stage.slots);
+  assert.deepEqual(pages.flatMap((p) => p.colHeads), stage.colHeads);
+  const widest = Math.max(...pages.map((p) => p.cols));
+  for (const p of pages) {
+    assert.deepEqual(p.geo, pages[0].geo);
+    assert.equal(p.cellCols, widest);
+  }
+  assert.deepEqual(pages.map((p) => p.part), pages.map((_, k) => `page ${k + 1} of ${pages.length}`));
+  assert.equal(new Set(pages.map((p) => p.key)).size, pages.length);
 });
 
-test('the cut falls on a section edge near the middle, and at the middle when none is near', () => {
-  assert.equal(splitColumn(19, [{ start: 0, span: 7 }, { start: 7, span: 4 }, { start: 11, span: 4 }, { start: 15, span: 4 }]), 11);
-  assert.equal(splitColumn(19, [{ start: 0, span: 3 }, { start: 3, span: 16 }]), 10);
-  assert.equal(splitColumn(2), 1);
+test('a cut falls on a section edge near its point, and on the point when none is near', () => {
+  const bands = [{ start: 0, span: 7 }, { start: 7, span: 4 }, { start: 11, span: 4 }, { start: 15, span: 4 }];
+  assert.deepEqual(splitColumns(19, 2, bands), [11]);
+  assert.deepEqual(splitColumns(19, 2, [{ start: 0, span: 3 }, { start: 3, span: 16 }]), [10]);
+  assert.deepEqual(splitColumns(2, 2), [1]);
+  assert.deepEqual(splitColumns(50, 5), [10, 20, 30, 40]);
+  assert.deepEqual(splitColumns(50, 5, [{ start: 0, span: 12 }, { start: 12, span: 38 }]), [12, 20, 30, 40]);
+  assert.deepEqual(splitColumns(19, 1, bands), []);
 });
 
-test('a band cut by the split is drawn on both pages, clipped to each', () => {
-  const stage = stageOf(10, 2, [{ sec: 'Alto', start: 0, span: 10, gridColumn: '1 / span 10' }]);
-  const [a, b] = printPages({ stage, names: namesOf(stage), split: 'two' });
-  assert.deepEqual(a.bands.map((x) => x.gridColumn), ['1 / span 5']);
-  assert.deepEqual(b.bands.map((x) => x.gridColumn), ['1 / span 5']);
+test('every page keeps at least one column, however many there are', () => {
+  for (let cols = 1; cols <= 12; cols++) {
+    for (let n = 1; n <= cols; n++) {
+      const edges = [0, ...splitColumns(cols, n, [{ start: 0, span: 1 }, { start: 1, span: cols - 1 }]), cols];
+      assert.equal(edges.length, n + 1);
+      for (let i = 1; i < edges.length; i++) assert.ok(edges[i] > edges[i - 1], `${cols} columns on ${n} pages: ${edges}`);
+    }
+  }
+});
+
+test('a band cut across pages is drawn on each, clipped to it', () => {
+  const stage = stageOf(30, 2, [{ sec: 'Alto', start: 0, span: 30, gridColumn: '1 / span 30' }]);
+  const pages = printPages({ stage, names: namesOf(stage) });
+  assert.ok(pages.length > 1);
+  assert.deepEqual(pages.map((p) => p.bands.map((x) => x.gridColumn)), pages.map((p) => [`1 / span ${p.cols}`]));
+});
+
+test('a stage whose depth caps the name size stops adding pages once they stop helping', () => {
+  const stage = stageOf(12, 10);
+  const pages = printPages({ stage, names: namesOf(stage, 'Bo') });
+  assert.ok(pages.length < 12);
 });
 
 test('Page per section is one page per section with anybody in it, each laid out on its own', () => {
@@ -238,6 +263,7 @@ test('Page per section is one page per section with anybody in it, each laid out
   ];
   const names = Object.fromEntries(blocks.flatMap((b) => b.slots).map((s) => [s.id, 'Joy Tobin']));
   const pages = printPages({ stage: stageOf(1, 1), blocks, names, layout: 'sections', colours: { Soprano: '#c00' } });
+  assert.equal(pages.length, 2);
   assert.deepEqual(pages.map((p) => p.part), ['Soprano', 'Tenor']);
   assert.deepEqual(pages.map((p) => p.focus), ['Soprano', 'Tenor']);
   assert.equal(pages[0].bands[0].color, '#c00');
@@ -247,10 +273,21 @@ test('Page per section is one page per section with anybody in it, each laid out
 test('a section on its own page prints larger than the same singers on the whole stage', () => {
   const stage = stageOf(19, 4);
   const names = namesOf(stage);
-  const whole = printPages({ stage, names, split: 'one' })[0];
+  const whole = sheetGeometry({ cols: 19, rows: 4, names: Object.values(names) });
   const block = { sec: 'Soprano', rows: 4, cols: 5, slots: stage.slots.slice(0, 20) };
   const sec = printPages({ stage, blocks: [block], names, layout: 'sections' })[0];
-  assert.ok(sec.geo.namePt > whole.geo.namePt);
+  assert.ok(sec.geo.namePt > whole.namePt);
+});
+
+test('a section too wide for one page goes across several, by the same rule', () => {
+  const stage = stageOf(24, 4);
+  const names = namesOf(stage);
+  const block = { sec: 'Bass', rows: 4, cols: 24, slots: stage.slots };
+  const pages = printPages({ stage, blocks: [block], names, layout: 'sections', colours: { Bass: '#0a0' } });
+  assert.ok(pages.length > 1);
+  assert.deepEqual(pages.map((p) => p.part), pages.map((_, k) => `Bass, page ${k + 1} of ${pages.length}`));
+  assert.ok(pages.every((p) => p.focus === 'Bass' && p.bands[0].color === '#0a0'));
+  assert.ok(pages[0].geo.namePt >= READABLE_PT);
 });
 
 /* ---------- the warning ---------- */
@@ -259,7 +296,7 @@ test('a readable size gets no warning, and a small one gets one line saying what
   assert.equal(legibilityWarning(LEGIBLE_FLOOR_PT), null);
   const warn = legibilityWarning(4.26);
   assert.match(warn, /4\.3pt/);
-  assert.match(warn, /By section/);
+  assert.match(warn, /First name \+ initial/);
   assert.ok(!/\n/.test(warn), 'one line');
 });
 

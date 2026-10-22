@@ -22,7 +22,7 @@ import {
   rowLabelAt,
   seatLabelFor
 } from '../src/utils/labels.js';
-import { COLS_MAX } from '../src/utils/persistence.js';
+import { COLS_MAX } from '../src/utils/arranger.js';
 
 /* ---------- the settings themselves ---------- */
 
@@ -61,11 +61,11 @@ test('alphaLabel: A to Z, then AA, AB and on', () => {
 });
 
 test('alphaLabel: the past-Z range is reachable inside the real grid, not theoretical', () => {
-  // COLS_MAX is 40, so a lettered column axis runs into AA at column 27 in normal use. This is
+  // COLS_MAX is 50, so a lettered column axis runs into AA at column 27 in normal use. This is
   // the case that makes bijective base-26 worth having rather than one letter that runs out.
   assert.ok(COLS_MAX > 26);
   assert.equal(alphaLabel(26), 'AA');
-  assert.equal(alphaLabel(COLS_MAX - 1), 'AN');
+  assert.equal(alphaLabel(COLS_MAX - 1), 'AX');
 });
 
 test('alphaLabel: nonsense in, empty string out', () => {
@@ -143,9 +143,9 @@ test('seatLabelFor: every seat in a grid gets its own label', () => {
 });
 
 test('seatLabelFor: a lettered column axis crosses Z inside a legal grid', () => {
-  const cols = COLS_MAX; // 40, the widest stage the app allows
+  const cols = COLS_MAX; // 50, the widest stage the app allows
   assert.equal(seatLabelFor(26 * ROWS, ROWS, cols, { rowLabel: 'letters', colLabel: 'letters' }), 'A-AA');
-  assert.equal(seatLabelFor(26 * ROWS, ROWS, cols, { colLabel: 'letters', colOrder: 'rtl' }), 'A-N');
+  assert.equal(seatLabelFor(26 * ROWS, ROWS, cols, { colLabel: 'letters', colOrder: 'rtl' }), 'A-X');
 });
 
 test('seatLabelFor: an index outside the grid has no label rather than a wrong one', () => {
