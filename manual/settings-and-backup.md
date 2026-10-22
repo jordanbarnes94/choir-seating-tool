@@ -47,7 +47,7 @@ On a computer or Android the installed app shares the browser's storage, so your
 
 ### Download the Windows app
 
-The [download page](https://jordanbarnes.uk/projects/choir-seating/download/) has Choir Seating Tool for Windows 10 and 11, in two forms:
+The [download page](https://jordanbarnes.uk/projects/choir-seating/download/), which **Download** at the top of the website's page opens, has Choir Seating Tool for Windows 10 and 11, in two forms:
 
 - **The one file** needs no installing: double-click it. Keep it wherever you like.
 - **The installer** adds it to the Start menu.

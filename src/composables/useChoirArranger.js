@@ -14,6 +14,7 @@ import {
   EXAMPLE_CONCERTS,
   EXAMPLE_ROSTER,
   LIMITS,
+  COLS_MIN,
   cloneSplits,
   cloneRoster,
   deriveSplitGlobals,
@@ -30,7 +31,6 @@ import {
   seatNames
 } from '../utils/arranger.js';
 import {
-  COLS_MIN,
   clampRows,
   clampCols,
   LS,

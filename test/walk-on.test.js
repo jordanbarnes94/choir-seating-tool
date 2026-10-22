@@ -17,6 +17,7 @@ import assert from 'node:assert/strict';
 import {
   BLOCKED,
   EMPTY,
+  ROWS_MAX,
   WALKON_DEFAULTS,
   WALKON_OPTIONS,
   blockedColumns,
@@ -27,7 +28,6 @@ import {
 } from '../src/utils/arranger.js';
 import { walkOnBadges, walkOnGroups, walkOnRows, walkOnText } from '../src/utils/walkOnList.js';
 import { LABEL_OPTIONS, seatLabelFor } from '../src/utils/labels.js';
-import { ROWS_MAX } from '../src/utils/persistence.js';
 
 /* ---------- helpers ---------- */
 

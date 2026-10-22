@@ -1,7 +1,7 @@
 <template>
   <div class="plansheet">
-    <!-- One printed page per entry of printPages(): the whole stage, its two halves when it is
-         wide, or one section each. Every page is the same document — title line, stage, footer —
+    <!-- One printed page per entry of printPages(): the whole stage, or each section, across as
+         many pages as its names need. Every page is the same document — title line, stage, footer —
          so each one can be read on its own. -->
     <div v-for="(pg, pi) in pages" :key="pg.key" class="sheetpage">
       <!-- ONE title line — the plan name and the date — and which page this is. -->
@@ -132,9 +132,6 @@ const props = defineProps({
   date: { type: Date, default: () => new Date() },
   // 'stage' draws the full stage; 'sections' puts each section on its own page.
   layout: { type: String, default: 'stage' },
-  // A wide stage over two pages: 'auto' when one page would print names too small to read,
-  // 'one' never, 'two' always. Full stage only.
-  split: { type: String, default: 'auto' },
   // 'full' names, or 'short': first name and surname initial (printNames).
   nameStyle: { type: String, default: 'full' },
   showReport: { type: Boolean, default: false },
@@ -151,7 +148,6 @@ const audienceTop = computed(() => props.plan.audienceAt === 'top');
 const printed = computed(() =>
   planPrintPages(props.plan, {
     layout: props.layout,
-    split: props.split,
     nameStyle: props.nameStyle,
     label: planView.value.ui.view !== SECTION_VIEW,
     showHeadings: props.showHeadings,
@@ -164,7 +160,8 @@ const names = computed(() => printed.value.names);
 // The CSS a page's grid sizes itself from. The width follows the printed width through `cqw`;
 // the depth and the name size are printPlan.js's, worked out for A4.
 function pageVars(pg) {
-  const cols = Math.max(1, geoCols(pg));
+  // A narrower page of a wide stage keeps the widest page's cell size, so the pages line up.
+  const cols = Math.max(1, pg.cellCols);
   const chromePx = stageChromeW(props.showHeadings) + (cols - 1) * PRINT_CELL.gap;
   const label = planView.value.ui.view !== SECTION_VIEW;
   return {
@@ -174,12 +171,6 @@ function pageVars(pg) {
     '--namelines': String(pg.geo.lines),
     '--labelroom': label ? `${Math.round((pg.geo.fontPx * 0.85 + 2) * 100) / 100}px` : '0px'
   };
-}
-// The halves of a split stage are drawn at the WIDER half's cell size, so the narrower one does
-// not stretch to fill its page and the two still line up side by side.
-function geoCols(pg) {
-  if (!pg.key.startsWith('stage-')) return pg.cols;
-  return Math.max(...pages.value.map((p) => p.cols));
 }
 
 // Built from the PLAN's walk-on block, not the store's, so a concert pack prints each plan's own
@@ -226,7 +217,7 @@ const footer = computed(() => notSeatedLine(waitingNames.value) || '');
   break-before: page;
   page-break-before: always; /* the pre-fragmentation spelling, for older print engines */
 }
-/* Every page after a sheet's first starts a new sheet of paper: a split stage's second half, or
+/* Every page after a sheet's first starts a new sheet of paper: the next part of a wide stage, or
    the next section. */
 .sheetpage + .sheetpage {
   break-before: page;
@@ -283,7 +274,7 @@ const footer = computed(() => notSeatedLine(waitingNames.value) || '');
   gap: 6px; /* SHEET.gutterGap */
 }
 .gutter {
-  width: 26px; /* SHEET.gutter */
+  width: 32px; /* SHEET.gutter */
   flex: none;
 }
 .rowheads {
@@ -317,11 +308,13 @@ const footer = computed(() => notSeatedLine(waitingNames.value) || '');
   display: grid;
   grid-auto-columns: var(--cellw);
   gap: 4px;
-  height: 13px; /* SHEET.colHeadH */
+  height: 20px; /* SHEET.colHeadH */
   width: max-content;
 }
+/* The size the names are printed at, at least (READABLE_PT): a singer finds their row and seat as
+   easily as their name. */
 .axislabel {
-  font-size: 11px;
+  font-size: 16px;
   font-weight: 700;
   color: #36404f;
   display: flex;

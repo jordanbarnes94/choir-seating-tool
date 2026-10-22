@@ -34,7 +34,7 @@ import { colLabelAt, normaliseLabels, rowLabelAt, seatLabelFor } from './labels.
 import { clampCols, clampRows, normaliseAudienceAt } from './persistence.js';
 
 // Above this many columns the preview keeps `END_COLS` at each end and drops the middle into one
-// gap cell. 40 chairs across (COLS_MAX) will not fit in a settings panel, and the two ends are
+// gap cell. 50 chairs across (COLS_MAX) will not fit in a settings panel, and the two ends are
 // what the four labelling settings are actually about.
 export const PREVIEW_MAX_COLS = 6;
 // The representative plan the Settings panel draws: deep and wide enough that every labelling

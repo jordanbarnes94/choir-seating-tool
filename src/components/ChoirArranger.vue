@@ -64,16 +64,6 @@
                   <option value="sections">Page per section</option>
                 </select>
               </label>
-              <!-- Full stage only: By section is a page per section already. Auto goes to two pages
-                   when one would print the names too small to read. -->
-              <label v-if="printLayout === 'stage'" class="pmrow">
-                <span class="pmlabel">Pages</span>
-                <select v-model="printSplit" class="csel">
-                  <option value="auto">Auto: two if one prints too small</option>
-                  <option value="one">One</option>
-                  <option value="two">Two: left half and right half</option>
-                </select>
-              </label>
               <label class="pmrow">
                 <span class="pmlabel">Names</span>
                 <select v-model="printNameStyle" class="csel">
@@ -120,11 +110,11 @@
           <div class="tgroup">
             <label class="clabel">
               Rows
-              <input class="num" type="number" min="1" max="8" :value="store.gridRows.value" @change="onRows" />
+              <input class="num" type="number" :min="ROWS_MIN" :max="ROWS_MAX" :value="store.gridRows.value" @change="onRows" />
             </label>
             <label class="clabel">
               Columns
-              <input class="num" type="number" min="1" max="40" :value="store.gridCols.value" @change="onCols" />
+              <input class="num" type="number" :min="COLS_MIN" :max="COLS_MAX" :value="store.gridCols.value" @change="onCols" />
             </label>
           </div>
 
@@ -254,7 +244,6 @@
           :view="store.ui.view"
           :name="sheet.name"
           :layout="printLayout"
-          :split="printSplit"
           :name-style="printNameStyle"
           :show-report="printReport"
           :show-walk-on="printWalkOn"
@@ -314,7 +303,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { SECTION_VIEW, rosterById } from '../utils/arranger';
+import { SECTION_VIEW, rosterById, ROWS_MIN, ROWS_MAX, COLS_MIN, COLS_MAX } from '../utils/arranger';
 import { documentTitle, legibilityWarning, planPrintPages } from '../utils/printPlan';
 import { cropToSection } from '../utils/stageLayout';
 import { useChoirArranger } from '../composables/useChoirArranger';
@@ -442,7 +431,6 @@ const planName = computed(() => {
 function printedNamePt(plan) {
   const { pages } = planPrintPages(plan, {
     layout: printLayout.value,
-    split: printSplit.value,
     nameStyle: printNameStyle.value,
     label: store.ui.view !== SECTION_VIEW
   });
@@ -470,8 +458,6 @@ function doExport(fn) {
 }
 // Full stage, or each section on its own page.
 const printLayout = ref('stage');
-// A wide stage over two pages: 'auto' (when one page would be too small to read), 'one', 'two'.
-const printSplit = ref('auto');
 // Full names, or first name and surname initial.
 const printNameStyle = ref('full');
 const printReport = ref(false); // off by default

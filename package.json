@@ -1,11 +1,15 @@
 {
   "name": "choir-seating-tool",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "description": "Seat a choir so every singer keeps a neighbour from each of their voice-part splits. Runs entirely in the browser.",
   "license": "AGPL-3.0-only",
-  "author": "Jordan Barnes",
+  "author": {
+    "name": "Jordan Barnes",
+    "url": "https://jordanbarnes.uk/"
+  },
   "homepage": "https://jordanbarnes.uk/projects/choir-seating/about/",
+  "downloadPage": "https://jordanbarnes.uk/projects/choir-seating/download/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jordanbarnes94/choir-seating-tool.git"

@@ -12,9 +12,9 @@
  * between the columns, which PlanSheet expresses in CSS container units (`cqw`) so it follows
  * whatever margins the print dialogue actually uses, and the HEIGHT is the whole printable depth
  * shared out between the rows. The name is then set as large as the names on that page allow,
- * wrapping at word boundaries onto as many lines as the cell has room for (fitNameFont). A wide
- * stage can go over two pages and By section puts each section on its own (printPages). The
- * numbers here assume A4 landscape at 10mm margins.
+ * wrapping at word boundaries onto as many lines as the cell has room for (fitNameFont). A stage,
+ * or a section on its own, too wide for its names to print at READABLE_PT goes across as many
+ * pages as that takes, or as near to it as the stage's depth allows (printPages). The numbers here assume A4 landscape at 10mm margins.
  *
  * ## The page metrics are constants, and PlanSheet.vue must agree with them
  *
@@ -29,11 +29,11 @@ export const PX_PER_MM = 96 / 25.4;
 
 /** The heights and widths of everything on the sheet that is not a seat, in CSS pixels. */
 export const SHEET = Object.freeze({
-  gutter: 26, // the row-heading gutter, matching StageView's
+  gutter: 32, // the row-heading gutter
   gutterGap: 6,
   bandH: 20, // the section header bands
   bandGap: 6,
-  colHeadH: 13, // the column heading strip
+  colHeadH: 20, // the column heading strip
   colHeadGap: 4,
   audienceGap: 8,
   audienceH: 22, // the AUDIENCE bar
@@ -65,12 +65,11 @@ export const PAGE = Object.freeze({ widthMm: 297, heightMm: 210, marginMm: 10 })
 
 /** The printed name size below which the Print button warns. */
 export const LEGIBLE_FLOOR_PT = 6;
-/** The size a wide stage has to fall below before Auto puts it on two pages. */
-export const READABLE_PT = 8;
+/** The size every name is printed at, at least, unless the stage's depth will not allow it. */
+export const READABLE_PT = 12;
 
 /** The print options, with the first of each the default. */
 export const NAME_STYLES = Object.freeze(['full', 'short']);
-export const SPLIT_MODES = Object.freeze(['auto', 'one', 'two']);
 
 // Held back from the page depth, so a rounding in the print engine cannot tip a full-height
 // plan onto a second sheet.
@@ -262,40 +261,90 @@ export function printNames(people, style = 'full') {
   return out;
 }
 
-/* ---------- a wide stage over two pages ---------- */
+/* ---------- a wide stage over several pages ---------- */
 
 /**
- * Where a wide stage is cut in two: somewhere in its middle fifth, at the edge of a section's
- * band if one falls there (a section read whole on one page is worth more than two exactly equal
- * halves), and otherwise at the middle.
+ * Where a block `cols` wide is cut into `n` pages: near each k/n of the way across, on the edge
+ * of a section's band if one falls within a fifth of a page's width of that point (a section read
+ * whole on one page is worth more than exactly equal pages), and otherwise at the point itself.
  *
  * @param {number} cols
+ * @param {number} n pages
  * @param {Array<{ start: number, span: number }>} [bands] stageLayout's bands
- * @returns {number} the first column of the second page
+ * @returns {number[]} the first column of each page after the first, ascending
  */
-export function splitColumn(cols, bands = []) {
-  const mid = cols / 2;
-  const lo = Math.max(1, Math.ceil(cols * 0.4));
-  const hi = Math.min(cols - 1, Math.floor(cols * 0.6));
-  let best = null;
-  for (const b of bands || []) {
-    for (const edge of [b.start, b.start + b.span]) {
-      if (edge < lo || edge > hi) continue;
-      if (best == null || Math.abs(edge - mid) < Math.abs(best - mid)) best = edge;
+export function splitColumns(cols, n, bands = []) {
+  const cuts = [];
+  const reach = (cols / n) * 0.2;
+  const edges = (bands || []).flatMap((b) => [b.start, b.start + b.span]);
+  for (let k = 1; k < n; k++) {
+    const at = (cols * k) / n;
+    // every page keeps at least one column, before and after this cut
+    const lo = (cuts.length ? cuts[cuts.length - 1] : 0) + 1;
+    const hi = cols - (n - k);
+    let best = null;
+    for (const e of edges) {
+      if (e < lo || e > hi || Math.abs(e - at) > reach) continue;
+      if (best == null || Math.abs(e - at) < Math.abs(best - at)) best = e;
     }
+    cuts.push(best ?? Math.min(hi, Math.max(lo, Math.ceil(at))));
   }
-  return best == null ? Math.ceil(mid) : best;
+  return cuts;
+}
+
+/**
+ * One block across as many pages as it takes for every name on it to print at READABLE_PT: the
+ * fewest that reach it, or, when the depth caps the name size below it, the fewest that print
+ * as large as any number would. Every page is laid out at the widest page's cell size, fitted to
+ * all the block's names, so the pages line up when they are put side by side.
+ */
+function acrossPages({ key, focus, rows, cols, slots, bands, rowHeads, colHeads }, geoFor) {
+  // A one-column page has the widest cell there is, so its name size is the most the depth allows.
+  const target = Math.min(READABLE_PT, geoFor(1, rows, slots).namePt) - 0.01;
+  let pick;
+  for (let n = 1; n <= Math.max(1, cols); n++) {
+    const cuts = splitColumns(cols, n, bands);
+    const edges = [0, ...cuts, cols];
+    const widest = Math.max(...edges.slice(1).map((e, i) => e - edges[i]));
+    pick = { edges, widest, geo: geoFor(widest, rows, slots) };
+    if (pick.geo.namePt >= target || widest <= 1) break;
+  }
+  const { edges, widest, geo } = pick;
+  const n = edges.length - 1;
+  return edges.slice(1).map((c1, k) => {
+    const c0 = edges[k];
+    const clipped = [];
+    for (const b of bands) {
+      const s = Math.max(b.start, c0), e = Math.min(b.start + b.span, c1);
+      if (s < e) clipped.push({ ...b, start: s - c0, span: e - s, gridColumn: `${s - c0 + 1} / span ${e - s}` });
+    }
+    const page = n > 1 ? `page ${k + 1} of ${n}` : '';
+    return {
+      key: n > 1 ? `${key}-${k}` : key,
+      part: [focus, page].filter(Boolean).join(', '),
+      rows,
+      cols: c1 - c0,
+      cellCols: widest,
+      slots: slots.slice(c0 * rows, c1 * rows),
+      bands: clipped,
+      rowHeads,
+      colHeads: colHeads.slice(c0, c1),
+      focus,
+      geo
+    };
+  });
 }
 
 /**
  * Every page one plan prints as, laid out. The one place that decides what goes on which sheet,
  * so the sheet and the legibility warning beside the Print button cannot disagree.
  *
- * - `layout: 'stage'` is the whole stage on one page, or on two when it is wide: `split: 'two'`
- *   always, `'auto'` when one page would print names below READABLE_PT. Both halves are laid out
- *   at the SAME cell size, so they line up when the pages are put side by side.
- * - `layout: 'sections'` is one page per section that has anybody seated, in the order they are
- *   drawn, each filling its page.
+ * - `layout: 'stage'` is the whole stage, across as many pages as READABLE_PT needs.
+ * - `layout: 'sections'` is each section that has anybody seated, in the order they are drawn,
+ *   each filling its own page or pages by the same rule.
+ *
+ * Each page's `cellCols` is the number of columns its cells are sized for: the widest page of its
+ * block, which a narrower page does not stretch past.
  *
  * @param {object} o
  * @param {object} o.stage  stageLayout()'s return for the plan
@@ -303,59 +352,37 @@ export function splitColumn(cols, bands = []) {
  *                 colHeads?: Array }>} [o.blocks] the section crops, in drawn order
  * @param {Record<string, string>} o.names  printNames() for the plan
  * @param {Record<string, string>} [o.colours] section colours, for the section pages' bands
- * @returns {Array<{ key: string, part: string, rows: number, cols: number, slots: Array,
- *   bands: Array, rowHeads: Array, colHeads: Array, focus: string|null, geo: object }>}
+ * @returns {Array<{ key: string, part: string, rows: number, cols: number, cellCols: number,
+ *   slots: Array, bands: Array, rowHeads: Array, colHeads: Array, focus: string|null, geo: object }>}
  */
-export function printPages({ stage, blocks = [], names = {}, colours = {}, layout = 'stage', split = 'auto', label = true, showHeadings = true, page = PAGE }) {
+export function printPages({ stage, blocks = [], names = {}, colours = {}, layout = 'stage', label = true, showHeadings = true, page = PAGE }) {
   const printed = (slots) => slots.filter((s) => isSinger(s.id) && names[s.id] != null).map((s) => names[s.id]);
   const geoFor = (cols, rows, slots) => sheetGeometry({ cols, rows, names: printed(slots), label, showHeadings, page });
 
   if (layout === 'sections') {
     return blocks
       .filter((b) => b.slots.length)
-      .map((b) => ({
-        key: 'sec-' + b.sec,
-        part: b.sec,
-        rows: b.rows,
-        cols: b.cols,
-        slots: b.slots,
-        bands: [{ sec: b.sec, start: 0, span: b.cols, gridColumn: `1 / span ${b.cols}`, color: colours[b.sec] }],
-        rowHeads: b.rowHeads || [],
-        colHeads: b.colHeads || [],
-        focus: b.sec,
-        geo: geoFor(b.cols, b.rows, b.slots)
-      }));
+      .flatMap((b) =>
+        acrossPages(
+          {
+            key: 'sec-' + b.sec,
+            focus: b.sec,
+            rows: b.rows,
+            cols: b.cols,
+            slots: b.slots,
+            bands: [{ sec: b.sec, start: 0, span: b.cols, gridColumn: `1 / span ${b.cols}`, color: colours[b.sec] }],
+            rowHeads: b.rowHeads || [],
+            colHeads: b.colHeads || []
+          },
+          geoFor
+        )
+      );
   }
 
-  const { rows, cols, slots } = stage;
-  const one = geoFor(cols, rows, slots);
-  const wantTwo = cols >= 2 && (split === 'two' || (split === 'auto' && one.namePt < READABLE_PT));
-  if (!wantTwo) {
-    return [{ key: 'stage', part: '', rows, cols, slots, bands: stage.bands, rowHeads: stage.rowHeads, colHeads: stage.colHeads, focus: null, geo: one }];
-  }
-
-  const cut = splitColumn(cols, stage.bands);
-  // One cell size for both halves: the wider half's, fitted to every name on either.
-  const geo = geoFor(Math.max(cut, cols - cut), rows, slots);
-  return [[0, cut], [cut, cols]].map(([c0, c1], k) => {
-    const bands = [];
-    for (const b of stage.bands) {
-      const s = Math.max(b.start, c0), e = Math.min(b.start + b.span, c1);
-      if (s < e) bands.push({ ...b, start: s - c0, span: e - s, gridColumn: `${s - c0 + 1} / span ${e - s}` });
-    }
-    return {
-      key: 'stage-' + k,
-      part: k === 0 ? 'left half, page 1 of 2' : 'right half, page 2 of 2',
-      rows,
-      cols: c1 - c0,
-      slots: slots.slice(c0 * rows, c1 * rows),
-      bands,
-      rowHeads: stage.rowHeads,
-      colHeads: stage.colHeads.slice(c0, c1),
-      focus: null,
-      geo
-    };
-  });
+  return acrossPages(
+    { key: 'stage', focus: null, rows: stage.rows, cols: stage.cols, slots: stage.slots, bands: stage.bands, rowHeads: stage.rowHeads, colHeads: stage.colHeads },
+    geoFor
+  );
 }
 
 /**
@@ -365,11 +392,11 @@ export function printPages({ stage, blocks = [], names = {}, colours = {}, layou
  *
  * @param {object} plan  the plan shape PlanSheet takes (roster, seats, rows, cols, sectionOrder,
  *                       labels, audienceAt)
- * @param {object} [o]   `layout`, `split`, `nameStyle`, `label`, `showHeadings`, and `colours`,
+ * @param {object} [o]   `layout`, `nameStyle`, `label`, `showHeadings`, and `colours`,
  *                       the section colours to paint the bands with
  * @returns {{ pages: Array, names: Record<string, string> }}
  */
-export function planPrintPages(plan, { layout = 'stage', split = 'auto', nameStyle = 'full', label = true, showHeadings = true, colours } = {}) {
+export function planPrintPages(plan, { layout = 'stage', nameStyle = 'full', label = true, showHeadings = true, colours } = {}) {
   const p = plan || {};
   const byId = rosterById(p.roster || []);
   const stage = stageLayout({
@@ -394,7 +421,7 @@ export function planPrintPages(plan, { layout = 'stage', split = 'auto', nameSty
     })
     .filter((b) => b.slots.length);
   const names = printNames(p.roster, nameStyle);
-  const pages = printPages({ stage, blocks, names, colours: colours || {}, layout, split, label, showHeadings });
+  const pages = printPages({ stage, blocks, names, colours: colours || {}, layout, label, showHeadings });
   return { pages, names };
 }
 
@@ -415,7 +442,7 @@ export function cellWidthCss(lines) {
  */
 export function legibilityWarning(namePt, floor = LEGIBLE_FLOOR_PT) {
   if (!(namePt < floor)) return null;
-  return `Names will print small (about ${Math.round(namePt * 10) / 10}pt) on this page. First name + initial, two pages, or By section print them larger.`;
+  return `Names will print small (about ${Math.round(namePt * 10) / 10}pt) on this page. First name + initial prints them larger.`;
 }
 
 /**

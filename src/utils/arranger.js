@@ -27,8 +27,9 @@
 
 /* ---------- constants ---------- */
 export const SECTIONS = ['Soprano', 'Alto', 'Tenor', 'Bass'];
-// the default stage depth (the rows selector clamps to ROWS_MIN..ROWS_MAX in utils/planFields.js).
+// The stage size: the default depth, and the bounds the rows and columns selectors clamp to.
 export const DEFAULT_ROWS = 4;
+export const ROWS_MIN = 1, ROWS_MAX = 12, COLS_MIN = 1, COLS_MAX = 50;
 // Stage shown from the audience: left to right = Soprano, Alto, Tenor, Bass. Used as the
 // default section precedence for auto-arrange assembly and header-band tie-breaks.
 export const STAGE_ORDER = ['Soprano', 'Alto', 'Tenor', 'Bass'];
@@ -789,9 +790,6 @@ export const WALKON_DEFAULTS = Object.freeze({
   rowSeq: null,
   splitCol: null
 });
-// The deepest stage the app allows. That bound is ROWS_MAX in utils/persistence.js, which imports
-// from this module, so it is mirrored here rather than imported back.
-const PER_ROW_MAX = 8;
 
 /**
  * Coerce anything claiming to be a walk-on block into a complete, legal one, field by field: a
@@ -804,12 +802,12 @@ const PER_ROW_MAX = 8;
 export function normaliseWalkOn(raw) {
   const src = raw && typeof raw === 'object' ? raw : {};
   const dir = (v) => (WALKON_OPTIONS.enterFrom.includes(v) ? v : null);
-  const perRow = Array.isArray(src.perRow) ? src.perRow.slice(0, PER_ROW_MAX).map(dir) : [];
+  const perRow = Array.isArray(src.perRow) ? src.perRow.slice(0, ROWS_MAX).map(dir) : [];
   // trailing nulls carry no information and would otherwise grow the saved plan forever.
   while (perRow.length && perRow[perRow.length - 1] == null) perRow.pop();
   const seq = Array.isArray(src.rowSeq) ? src.rowSeq : null;
   const rowSeq =
-    seq && seq.length && seq.length <= PER_ROW_MAX && seq.every((r) => Number.isInteger(r) && r >= 0 && r < PER_ROW_MAX) && new Set(seq).size === seq.length
+    seq && seq.length && seq.length <= ROWS_MAX && seq.every((r) => Number.isInteger(r) && r >= 0 && r < ROWS_MAX) && new Set(seq).size === seq.length
       ? seq.slice()
       : null;
   return {

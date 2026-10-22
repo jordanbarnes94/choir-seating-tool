@@ -3,10 +3,8 @@
  * Kept apart from utils/persistence.js so utils/library.js can use them; persistence.js
  * re-exports everything here.
  */
-import { SECTIONS, DEFAULT_ROWS, isSinger, LIMITS } from './arranger.js';
+import { SECTIONS, DEFAULT_ROWS, ROWS_MIN, ROWS_MAX, COLS_MIN, COLS_MAX, isSinger, LIMITS } from './arranger.js';
 
-// Grid-size bounds for the fixed rows×cols stage.
-export const ROWS_MIN = 1, ROWS_MAX = 8, COLS_MIN = 1, COLS_MAX = 40;
 export const clampRows = (n) => Math.max(ROWS_MIN, Math.min(ROWS_MAX, Math.round(n) || DEFAULT_ROWS));
 export const clampCols = (n) => Math.max(COLS_MIN, Math.min(COLS_MAX, Math.round(n) || COLS_MIN));
 

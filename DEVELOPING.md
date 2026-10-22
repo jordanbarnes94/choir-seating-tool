@@ -658,7 +658,7 @@ from the two viewpoints, which is why every printed or exported output states th
 Changing the viewpoint **writes nothing else**; it doesn't flip the label settings.
 
 The format always includes a separator (`B-7`, `7-C`). Letters are bijective base-26 (`A…Z, AA…`)
-because the grid can be up to 40 columns wide.
+because the grid can be up to 50 columns wide.
 
 Labelling is purely cosmetic. Nothing in `labels.js` touches `seats`, indexes, the solver or drops.
 
@@ -756,10 +756,12 @@ Printing takes three parts working together.
    printable width and height of an A4 landscape page with 10 mm margins, and `fitNameFont`
    binary-searches the largest name size at which every name wraps at word boundaries without
    breaking a word. Name widths are *estimated* from per-character em widths deliberately set on the
-   wide side, since there is no DOM to measure against. `auto` splits the stage onto two pages when
-   one page would print names below 8 pt, cutting at a section-band edge in the middle fifth if there
-   is one. The Print button's warning (`legibilityWarning`, below 6 pt) reads the same page plan, so
-   the warning always describes what will print.
+   wide side, since there is no DOM to measure against. A stage, or a section on its own page, goes
+   across the fewest pages that print every name at `READABLE_PT` (12 pt), or as near to it as the
+   stage's depth allows (a 12-row stage tops out just below), each cut moved onto a
+   nearby section-band edge if there is one, and every page at the widest page's cell size so they
+   line up side by side. There is no option for it. The Print button's warning (`legibilityWarning`,
+   below 6 pt) reads the same page plan, so the warning always describes what will print.
 
 **The constants in `SHEET` / `PRINT_CELL` must match PlanSheet.vue's CSS.** Every strip on the
 sheet has an explicit height so the arithmetic is exact.
@@ -993,12 +995,14 @@ and a seat's menu, which `SeatGrid` teleports to `<body>`.
 
 The page shell: the fixed top bar, the dark canvas, and a footer with the manual, the source, the
 third-party notices (**Licences**), the version and the author. The footer is how a hosted copy
-says what it is running, which the licence asks of anyone who hosts one. `vite.config.js` defines `__APP_VERSION__`, `__APP_HOMEPAGE__`,
-`__APP_AUTHOR__` and `__APP_REPOSITORY__` from `package.json`.
+says what it is running, which the licence asks of anyone who hosts one. `vite.config.js` defines
+`__APP_VERSION__`, `__APP_HOMEPAGE__`, `__APP_DOWNLOAD__`, `__APP_AUTHOR__`, `__APP_AUTHOR_SITE__`
+and `__APP_REPOSITORY__` from `package.json`.
 
 The bar holds the link back to the project's page (`homepage` in `package.json`), **Install app**,
-and the "new version" notice. Install app is the browser's own install prompt, which Chrome and
-Edge hand over in a `beforeinstallprompt` event when the app can be installed and is not yet. No
+**Download** (`downloadPage`, the website's page for the Windows app), and the "new version"
+notice. The back link and Download are the website's, so an installed copy and the desktop app
+hide them. Install app is the browser's own install prompt, which Chrome and Edge hand over in a `beforeinstallprompt` event when the app can be installed and is not yet. No
 other browser does, so the button never shows there.
 
 The link back is the published about page, wherever the build is hosted. The one exception is a
