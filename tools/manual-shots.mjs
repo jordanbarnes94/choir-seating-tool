@@ -76,7 +76,6 @@ const narrowShot = async (name, loc, width, hide = null) => {
     if (h) el.querySelectorAll(h).forEach((c) => { c.style.display = ''; });
   }, hide);
 };
-const button = (name) => page.getByRole('button', { name, exact: true });
 const tipOff = () => page.mouse.move(2, 2);
 
 try {

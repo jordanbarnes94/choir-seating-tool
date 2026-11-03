@@ -1181,6 +1181,11 @@ it: there is no capability file, so the page has no access to Tauri's API. Build
 
 ## Tests and tools
 
+* **`npm run lint`** runs ESLint's recommended rules and `eslint-plugin-vue`'s essential ones
+  (`eslint.config.js`) over everything but `dist/`, `src-tauri/` and `.smoke/`. Its main job is
+  `no-undef`: a misspelt or never-imported helper builds cleanly and throws only when its line
+  runs. A new `define` in `vite.config.js` needs adding to the config's globals. Empty `catch {}`
+  blocks are allowed, since that is how the app ignores a failure that does not matter.
 * **`npm test`** runs `node --test "test/*.test.js"` with no dependencies. It covers the pure modules only:
   `persistence`, `plan`, `plan-view`, `singer-ids`, `library`, `colour`, `palettes`, `labels`,
   `seat-preview`, `stage-layout`, `export`, `print`, `walk-on`, `import`, `solver`.

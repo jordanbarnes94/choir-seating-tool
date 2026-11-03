@@ -1178,7 +1178,7 @@ function createStore() {
   // A roster as a spreadsheet the importer reads back: names and sections, and never a split,
   // whatever concert is open — splits belong to a concert, and the concert has its own export.
   function exportRosterCSV(rosterId = null) {
-    const r = rosterId ? findAnyRoster(rosterId) : openRoster.value;
+    const r = rosterId ? findRoster(library.value, rosterId) : openRoster.value;
     if (!r) return;
     const rows = [['Name', 'Section']];
     r.singers.slice().sort(bySectionThenName).forEach((p) => rows.push([p.name, p.section]));

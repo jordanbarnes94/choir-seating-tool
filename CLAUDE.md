@@ -21,6 +21,9 @@ rules that are easy to break. `README.md` is for people who use or host the app.
   also checks the manual's built pages (`tools/vite-manual.mjs`). The glob is deliberate.
   `node --test` with no argument treats *every* file under `test/` as a test, which would run
   `test/fixtures/import/make-fixtures.mjs`.
+- `npm run lint` runs ESLint (`eslint.config.js`) over the app, the tools and the tests. It is what
+  catches a name that is used but never defined or imported, which the build does not: Vite takes
+  an unknown name for a global, and it fails only when that line runs.
 - `node tools/store-smoke.mjs` drives the LIVE store headlessly, which `npm test` does not: it
   imports the store and runs it against stubbed browser globals. It is a tool, not a test. Run it
   after anything that touches `SCHEMA`, the stored shape or the seating array. It is the only
@@ -40,7 +43,7 @@ rules that are easy to break. `README.md` is for people who use or host the app.
   `DEVELOPING.md` before changing `src-tauri/tauri.conf.json`: its `identifier` decides where
   people's work is kept, and its `pubkey` decides whose updates an installed copy accepts.
 
-CI runs the tests, the store smoke tool and the build on every push.
+CI runs the lint, the tests, the store smoke tool and the build on every push.
 
 ## Branches and pull requests
 

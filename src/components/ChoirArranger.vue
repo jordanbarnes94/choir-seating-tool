@@ -303,9 +303,8 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { SECTION_VIEW, rosterById, ROWS_MIN, ROWS_MAX, COLS_MIN, COLS_MAX } from '../utils/arranger';
+import { SECTION_VIEW, ROWS_MIN, ROWS_MAX, COLS_MIN, COLS_MAX } from '../utils/arranger';
 import { documentTitle, legibilityWarning, planPrintPages } from '../utils/printPlan';
-import { cropToSection } from '../utils/stageLayout';
 import { useChoirArranger } from '../composables/useChoirArranger';
 import { usePress } from '../composables/useDragDrop';
 import StageView from './StageView.vue';
