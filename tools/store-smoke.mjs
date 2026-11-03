@@ -175,12 +175,25 @@ assert.ok(seating.includes('Julian Barlow'));
 assert.ok(!/(^|[,"\n])s\d+([,"\n]|$)/.test(seating), 'a bare id must never reach the seating file');
 store.exportRosterCSV();
 assert.ok(!/(^|,)s\d+(,|$)/m.test(DOWNLOADED), 'nor the roster file');
-assert.equal(DOWNLOADED.replace(/^﻿/, '').split('\r\n')[0], 'Name,Section', 'a roster file has no split columns, whatever is open');
+assert.equal(DOWNLOADED.replace(/^\uFEFF/, '').split('\r\n')[0], 'Name,Section', 'a roster file has no split columns, whatever is open');
 store.exportConcertCSV();
 assert.ok(!/(^|,)s\d+(,|$)/m.test(DOWNLOADED), 'nor the concert file');
-assert.equal(DOWNLOADED.replace(/^﻿/, '').split('\r\n')[0], ['Name', 'Section', ...store.splits.value.map((s) => s.name)].join(','), 'a concert file carries its splits');
+assert.equal(DOWNLOADED.replace(/^\uFEFF/, '').split('\r\n')[0], ['Name', 'Section', ...store.splits.value.map((s) => s.name)].join(','), 'a concert file carries its splits');
 assert.equal(DOWNLOADED.trim().split('\r\n').length - 1, store.data.value.length, 'one row per singer in the concert');
 ok('the three CSV exports carry names and no ids; only the concert one carries splits');
+
+// the Roster tab's Export roster names its roster by id, and gets the same file
+{
+  store.exportRosterCSV();
+  const open = DOWNLOADED;
+  DOWNLOADED = null;
+  store.exportRosterCSV(store.openRoster.value.id);
+  assert.equal(DOWNLOADED, open, 'a roster exported by id is the file the open roster exports');
+  const sections = DOWNLOADED.trim().split('\r\n').slice(1).map((l) => l.split(',')[1]);
+  assert.equal(sections.length, store.openRoster.value.singers.length, 'one row per singer in the roster');
+  assert.deepEqual(sections, sections.slice().sort((a, b) => A.SECTIONS.indexOf(a) - A.SECTIONS.indexOf(b)), 'in section order');
+  ok('a roster exports by id, as the Roster tab asks for it');
+}
 
 /* ---------- 5b. the Roster tab's import: a new roster, or a replace matched by name ---------- */
 {

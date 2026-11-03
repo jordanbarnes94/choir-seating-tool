@@ -30,6 +30,7 @@ jobs:
             exit 1
           fi
       - run: npm ci
+      - run: npm run lint
       - run: npm test
       - run: node tools/store-smoke.mjs
       - run: npm run build
